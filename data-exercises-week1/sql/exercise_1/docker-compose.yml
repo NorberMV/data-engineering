@@ -1,13 +1,13 @@
-version: '3.8'  # This specifies the version of Docker Compose syntax
+version: '3.8'
 
 services:
   db:
     image: postgres
     restart: always
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: test_db
+      POSTGRES_USER: nmv
+      POSTGRES_PASSWORD: coderhouse
+      POSTGRES_DB: coderhouse_db
     ports:
       - "5432:5432"
     volumes:
@@ -18,7 +18,7 @@ services:
     image: dpage/pgadmin4
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: root
+      PGADMIN_DEFAULT_EMAIL: admin@coderhouse.com
+      PGADMIN_DEFAULT_PASSWORD: coderhouse
     ports:
       - "5050:80"
