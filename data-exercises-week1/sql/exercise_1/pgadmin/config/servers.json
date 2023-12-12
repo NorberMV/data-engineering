@@ -1,0 +1,16 @@
+
+{
+    "Servers": {
+        "1": {
+            "Name": "Coderhouse_db",
+            "Group": "Servers",
+            "Host": "db",
+            "Port": 5432,
+            "Username": "nmv",
+            "Password": "coderhouse",
+            "MaintenanceDB": "coderhouse_db",
+            "SSLMode": "prefer"
+        }
+    }
+}
+
