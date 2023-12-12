@@ -1,0 +1,1 @@
+SELECT customerid, name FROM customers
