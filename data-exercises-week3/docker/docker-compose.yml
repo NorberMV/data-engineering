@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: nmv
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      
+
       POSTGRES_DB: coderhouse_db
     ports:
       - "5432:5432"

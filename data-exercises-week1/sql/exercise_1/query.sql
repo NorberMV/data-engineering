@@ -1,1 +1,0 @@
-SELECT * FROM agents WHERE name LIKE 'M%' OR name LIKE '%O';
