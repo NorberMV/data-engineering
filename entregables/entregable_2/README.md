@@ -1,10 +1,9 @@
 
-- [entregable-2](#entregable-2)
+# Entregable-2
+Carga de datos en Amazon Redshift.
+
 - [How can I install `entregable-2`?](#how-can-i-install-entregable-2)
 - [How can I run this ?](#how-can-i-run-this?)
-
-# entregable-2
-Carga de datos en Amazon Redshift.
 
 # How can I install `entregable-2`?
 - Create a new a virtual environment with Python >3. [here](https://realpython.com/intro-to-pyenv/) is a good example using Pyenv.
