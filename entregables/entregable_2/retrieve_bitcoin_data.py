@@ -21,7 +21,6 @@ logging.basicConfig(
     level=logging.DEBUG
 )
 logger = logging.getLogger(name='Bitcoin Data ETL')
-globals()['logger'] = logger
 # This file is used by dotenv to load the db credentials
 env_file = Path('.').resolve() / '.env'
 
