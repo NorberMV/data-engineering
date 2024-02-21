@@ -1,5 +1,7 @@
 
 import os
+import sys
+
 import requests
 import time
 from configparser import ConfigParser
@@ -9,10 +11,17 @@ from sqlalchemy.exc import SQLAlchemyError, ResourceClosedError
 import pandas as pd
 from pathlib import Path
 import yfinance as yf
+import logging
 from dotenv import load_dotenv
 load_dotenv()
 
-
+# Event logging system Config.
+logging.basicConfig(
+    format='[%(name)s] %(asctime)s - %(message)s',
+    level=logging.DEBUG
+)
+logger = logging.getLogger(name='Bitcoin Data ETL')
+globals()['logger'] = logger
 # This file is used by dotenv to load the db credentials
 env_file = Path('.').resolve() / '.env'
 
@@ -49,7 +58,7 @@ def conn_to_db(conn_str: URL) -> tuple :
         conn = engine.connect()
         return conn, engine
     except SQLAlchemyError as e:
-        print(f"Error connecting to the database: {e}")
+        logger.error(f"Error connecting to the database: {e}")
         return None, None
 
 def get_bitcoin_data(vs_currency='usd', days='30', interval='daily'):
@@ -74,9 +83,10 @@ def get_bitcoin_data(vs_currency='usd', days='30', interval='daily'):
             f"Something went wrong with the request. "
             f"Find the traceback below:\n{e}"
         )
-        print(err_msg)
-        raise e
+        logger.error(err_msg)
+        sys.exit(1)
     data = response.json()
+    logger.debug(f"Retrieved {len(data)} items successfully from the API...")
     return data
 
 def process_data_into_df(data):
@@ -137,6 +147,7 @@ if __name__=="__main__":
     # Get connection and engine
     conn, engine = conn_to_db(conn_str)
     # Create the table 'bitcoin_data'
+    logger.debug(f"Creating the Redshift table {full_schema!r}")
     if conn is not None:
         try:
             with conn.begin() as trans:
@@ -153,18 +164,18 @@ if __name__=="__main__":
                 )
                 trans.commit()
         except Exception as e:
-            print(f"An error occurred: {e}")
+            logger.error(f"An error occurred: {e}")
         finally:
             conn.close()
     else:
-        print("Failed to connect to the database.")
+        logger.debug("Failed to connect to the database.")
 
     # Let's wait for a 3 seconds to populate the table
-    print('\n\nsleeping for 3 seconds...')
+    logger.debug('Sleeping for 3 seconds...')
     time.sleep(3)
     # Get connection and engine again
     conn, engine = conn_to_db(conn_str)
-    print('\n\nConnecting again...')
+    logger.debug('Populating the Redshift table...')
 
     # Populate the table with the DataFrame
     if conn is not None:
@@ -180,8 +191,9 @@ if __name__=="__main__":
                 trans.commit()
         except Exception as e:
             if isinstance(e, ResourceClosedError):
-                print("Failed to connect to the database");
+                logger.error("Failed to connect to the database");
             else:
-                print(f"An error occurred: {e}")
+                logger.error(f"An error occurred: {e}")
         finally:
+            logger.debug("Closing the Redshift DB connection...")
             conn.close()
