@@ -23,6 +23,10 @@ logging.basicConfig(
 logger = logging.getLogger(name='Bitcoin Data ETL')
 # This file is used by dotenv to load the db credentials
 env_file = Path('.').resolve() / '.env'
+# sql queries path
+sql_root = Path('.').resolve() / 'sql'
+create_db_sql = sql_root / 'create_db.sql'
+populate_db_sql = sql_root / 'populate_db.sql'
 
 # DB configuration environment variables
 user = os.getenv('USERNAME')
@@ -149,18 +153,12 @@ if __name__=="__main__":
     logger.debug(f"Creating the Redshift table {full_schema!r}")
     if conn is not None:
         try:
+            # Read the SQL file
+            with open(create_db_sql.as_posix(), 'r') as file:
+                create_db_sql = file.read()
+            formatted_create_sql = create_db_sql.format(full_schema=full_schema)
             with conn.begin() as trans:
-                conn.execute(
-                    f"""
-                    DROP TABLE IF EXISTS {full_schema};
-                    CREATE TABLE {full_schema} (
-                        Date TIMESTAMP,
-                        prices FLOAT,
-                        market_caps FLOAT,
-                        total_volumes FLOAT
-                    );
-                    """
-                )
+                conn.execute(formatted_create_sql)
                 trans.commit()
         except Exception as e:
             logger.error(f"An error occurred: {e}")
@@ -179,13 +177,22 @@ if __name__=="__main__":
     # Populate the table with the DataFrame
     if conn is not None:
         try:
+            # Read the SQL file
+            with open(populate_db_sql.as_posix(), 'r') as file:
+                populate_db_sql = file.read()
+            # Format the SQL template with the full_schema
+            populate_db_sql_formatted = populate_db_sql.format(full_schema=full_schema)
             with conn.begin() as trans:
                 for index, row in df.iterrows():
-                    sql = f"""
-                    INSERT INTO {full_schema} (Date, prices, market_caps, total_volumes)
-                    VALUES (%s, %s, %s, %s);
-                    """
-                    conn.execute(sql, (index, row['prices'], row['market_caps'], row['total_volumes']))
+                    conn.execute(
+                        populate_db_sql_formatted,
+                        (
+                            index,
+                            row['prices'],
+                            row['market_caps'],
+                            row['total_volumes']
+                        )
+                    )
                 # Commit the transaction
                 trans.commit()
         except Exception as e:
