@@ -1,38 +1,70 @@
+import sys
 import os
+import logging
 from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
-from sqlalchemy.exc import SQLAlchemyError, ResourceClosedError
+from sqlalchemy.exc import (
+    SQLAlchemyError,
+    ResourceClosedError
+)
+# Add the all the callable package to the sys.path.
+# I'm normalizing the path to avoid getting import errors.
+sys.path.insert(
+    0,
+    os.path.normpath(
+        os.path.join(
+            os.path.dirname(__file__),  # ./dags
+            os.pardir,                  # ./
+            "dag_callables",            # ./dag_callables
+        )
+    ),
+)
+import api_data as dt
 from dotenv import load_dotenv
 load_dotenv()
 
 
-# This file is used by dotenv to load the db credentials
-ROOT = Path('.').resolve()
-ENV_FILE = ROOT / '.env'
-# CSV_DATA = ROOT / csv_data
 
-# sql queries path
-SQL_ROOT = ROOT / 'sql'
+# Root paths definitions used by the
+# redshift_dag
+ROOT = os.path.normpath(
+    os.path.join(
+        os.path.dirname(__file__),
+        os.pardir,
+    )
+)
+ENV_FILE = Path(ROOT) / '.env'
+SQL_ROOT = Path(ROOT) / 'sql'
+TABLE_EXISTS_SQL_PATH = SQL_ROOT / 'table_exists.sql'
 CREATE_DB_SQL_PATH = SQL_ROOT / 'create_db.sql'
-POPULATE_DB_SQL_PATH = SQL_ROOT / 'populate_db.sql'
-SCHEMA = "norbermv_dev_coderhouse"
-FULL_SCHEMA = f"{SCHEMA}.bitcoin_data"
+INSERT_DB_SQL_PATH = SQL_ROOT / 'populate_db.sql'
 
-# DB configuration environment variables
+# Redshift DB configuration envvars
 user = os.getenv('USERNAME')
 passw = os.getenv('PASSW')
 host = os.getenv('HOST')
 port = os.getenv('PORT')
 dbname = os.getenv('DB_NAME')
+SCHEMA = "norbermv_dev_coderhouse"
+FULL_SCHEMA = f"{SCHEMA}.bitcoin_data"
+REDSHIFT_CONN_ID = "redshift_coder"
+
+# Event logging system Config.
+logging.basicConfig(
+    format='[%(name)s] %(asctime)s - %(message)s',
+    level=logging.DEBUG
+)
+logger = logging.getLogger(name='Bitcoin Data ETL')
+
 
 
 def build_conn_string(
-    user: str,
-    passw: str,
-    host: str,
-    port: str,
-    dbname: str
+        user: str,
+        passw: str,
+        host: str,
+        port: str,
+        dbname: str
 ) -> URL:
     conn_string = URL.create(
         drivername="postgresql",
@@ -55,7 +87,6 @@ def conn_to_db(conn_str: URL) -> tuple :
         logger.error(f"Error connecting to the database: {e}")
         return None, None
 
-# ANOTHER FUNCTION HERE #########################
 def _populate_db(df, str_query=None):
     """..."""
     # Build the connection string, and connect to the DB
@@ -96,28 +127,24 @@ def _populate_db(df, str_query=None):
         finally:
             logger.debug("Closing the Redshift DB connection...")
             conn.close()
-        
-#######################################
 
 def load_and_format_sql(full_schema: str) -> str:
     """
     Load SQL queries from files and format them with provided schema.
 
     :param full_schema: The schema name to format the SQL query with.
-    :return: A tuple containing the SQL query for creating the database and
-             the formatted SQL query for populating the database.
+    :return: The formatted SQL query for insert API data into the database.
     """
-
     # Load and return SQL content
-    populate_db_sql = POPULATE_DB_SQL_PATH.read_text().format(full_schema=full_schema)
+    populate_db_sql = INSERT_DB_SQL_PATH.read_text().format(full_schema=full_schema)
 
     return populate_db_sql
 
 def _retrieve_api_data():
     """..."""
 
-    data = get_bitcoin_data()
-    df = process_data_into_df(data)
+    data = dt.get_bitcoin_data()
+    df = dt.process_data_into_df(data)
     # So far we got something like the following DataFrame:
     """
                       prices   market_caps  total_volumes
@@ -128,5 +155,4 @@ def _retrieve_api_data():
     2024-01-18  42713.859187  8.369880e+11   2.129906e+10
     2024-01-19  41261.394798  8.088458e+11   2.516043e+10
     """
-    # _df_to_csv(df)
     return df

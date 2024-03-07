@@ -1,7 +1,6 @@
 import requests
 import logging
 import pandas as pd
-# from utils import csv_data
 
 
 # Event logging system Config.
@@ -10,6 +9,8 @@ logging.basicConfig(
     level=logging.DEBUG
 )
 logger = logging.getLogger(name='Bitcoin Data ETL')
+
+
 
 def get_bitcoin_data(vs_currency='usd', days='30', interval='daily'):
     """
@@ -38,6 +39,7 @@ def get_bitcoin_data(vs_currency='usd', days='30', interval='daily'):
     data = response.json()
     logger.debug(f"Retrieved {len(data)} items successfully from the API...")
     return data
+
 
 # Process the API data
 def process_data_into_df(data):
@@ -69,11 +71,3 @@ def process_data_into_df(data):
     df.set_index('timestamp', inplace=True)
 
     return df
-#
-# def _df_to_csv(df):
-#     try:
-#         df.to_csv(csv_data, index=False)
-#     except Exception as e:
-#         raise e
-#     else:
-#         logger.debug("DF conversion to CSV Successful!")
