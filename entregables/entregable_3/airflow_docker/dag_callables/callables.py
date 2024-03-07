@@ -1,6 +1,7 @@
 import sys
 import os
-# Add the all the callable package to the sys.path.
+
+# Add the the dag_callables package to the sys.path.
 sys.path.insert(
     0,
     os.path.normpath(

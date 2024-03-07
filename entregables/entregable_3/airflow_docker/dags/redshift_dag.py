@@ -5,7 +5,7 @@ from airflow import DAG
 from airflow.providers.amazon.aws.operators.redshift_sql import RedshiftSQLOperator
 from airflow.operators.python_operator import PythonOperator
 
-# Add the the callable package to the sys.path.
+# Add the the dag_callables package to the sys.path.
 # I'm also normalizing the path to avoid getting import errors.
 sys.path.insert(
     0,

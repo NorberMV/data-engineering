@@ -8,7 +8,7 @@ from sqlalchemy.exc import (
     SQLAlchemyError,
     ResourceClosedError
 )
-# Add the all the callable package to the sys.path.
+# Add the the dag_callables package to the sys.path.
 # I'm normalizing the path to avoid getting import errors.
 sys.path.insert(
     0,
