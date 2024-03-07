@@ -12,8 +12,8 @@ sys.path.insert(
     os.path.normpath(
         os.path.join(
             os.path.dirname(__file__),  # ./dags
-            os.pardir,  # ./
-            "dag_callables",  # ./dag_callables
+            os.pardir,                  # ./
+            "dag_callables",            # ./dag_callables
         )
     ),
 )
