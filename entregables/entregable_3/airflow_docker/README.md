@@ -29,7 +29,7 @@ docker compose up --build
 ```
 - Once the build is done, please go to `localhost:8080` in whatever browser you want.
 - Input `airflow` as the user and `airflow`for the password . 
-- Once inside, before activate the DAG, please Add a new Redshift connection, 
+- Once inside, before activate the DAG, please add a new Redshift connection as follows: 
   - to do so go to Admin/Connections on the Airflow ui.
   - Fill the connection fields provided in the `.env` shared file, please use `"redshift_coder"` as the connection Id. 
 - Finally activate the DAG, wait for it to turn dark green so that means the pipeline has run.
