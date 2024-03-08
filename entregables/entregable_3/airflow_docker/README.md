@@ -9,10 +9,11 @@ It also dockerizes a script to make it functional on any operating system.
 - [How can I run this ?](#how-can-i-run-this?)
 
 # How can I install `entregable-3`?
-There's nothing to install, just make sure you have the following installed on your machine:
-- You need to have Docker Desktop and Docker compose installed.
-- Create a `./logs` folder at the root of the repo.
-- This is assuming you have an `.env` file at the root of the repo containing the following Redshift DB data:
+Just make sure you have the following installed and set up on your machine:
+
+- You need to have Docker Desktop and Docker Compose installed.
+- Create a ./logs folder at the root of the repository.
+- This assumes you have an `.env` file at the root of the repository containing the following Redshift DB data:
 ```
 DB_NAME=
 HOST=
